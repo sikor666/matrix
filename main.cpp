@@ -7,21 +7,21 @@ using VectorType = std::vector<ElementType>;
 using VectorIterator = VectorType::iterator;
 using TaskType = ElementType(VectorIterator, VectorIterator, ElementType);
 
-// task: place the value in px pointer wtf
+// task: place the value in px
 auto set = [](
-    std::promise<ElementType>* px,
+    std::promise<ElementType>&& px,
     std::function<TaskType> task,
     VectorIterator begin,
     VectorIterator end)
 {
     try
     {
-        px->set_value(task(begin, end, 0.0));
+        px.set_value(task(begin, end, 0.0));
     }
     catch (...)
     {
         // pass the exception to the future's thread
-        px->set_exception(std::current_exception());
+        px.set_exception(std::current_exception());
     }
 };
 
@@ -46,7 +46,7 @@ auto accum = [](VectorIterator begin, VectorIterator end, ElementType init)
     return std::accumulate(begin, end, init);
 };
 
-// TODO(sikor): template, decltype, tests, parts
+// TODO(sikor): template, decltype
 auto compt(VectorType& v)
 {
     std::packaged_task<TaskType> pt0{ accum };          // package the task (i.e., accum)
@@ -63,7 +63,7 @@ auto compt(VectorType& v)
     auto sz = std::size(v);
 
     // start a thread for ptx, move is necessary because ptx is non-copyable object,
-    // copy constructor is deleted, std::packaged_task is move-only.
+    // copy constructor and assignment operator is deleted, std::packaged_task is move-only
     std::thread t0{ std::move(pt0), v0            , v0 + sz * 0.25, 0.0 };
     std::thread t1{ std::move(pt1), v0 + sz * 0.25, v0 + sz * 0.50, 0.0 };
     std::thread t2{ std::move(pt2), v0 + sz * 0.50, v0 + sz * 0.75, 0.0 };
@@ -105,10 +105,11 @@ auto compp(VectorType& v)
     auto v0 = std::begin(v);
     auto sz = std::size(v);
 
-    std::thread t0{ set, &p0, accum, v0            , v0 + sz * 0.25 };
-    std::thread t1{ set, &p1, accum, v0 + sz * 0.25, v0 + sz * 0.50 };
-    std::thread t2{ set, &p2, accum, v0 + sz * 0.50, v0 + sz * 0.75 };
-    std::thread t3{ set, &p3, accum, v0 + sz * 0.75, v0 + sz        };
+    // std::promise is move-only, copy constructor and assignment operator is deleted
+    std::thread t0{ set, std::move(p0), accum, v0            , v0 + sz * 0.25 };
+    std::thread t1{ set, std::move(p1), accum, v0 + sz * 0.25, v0 + sz * 0.50 };
+    std::thread t2{ set, std::move(p2), accum, v0 + sz * 0.50, v0 + sz * 0.75 };
+    std::thread t3{ set, std::move(p3), accum, v0 + sz * 0.75, v0 + sz        };
 
     t0.detach();
     t1.detach();
@@ -124,7 +125,7 @@ int main()
 
     try
     {
-        VectorType v(100000000);
+        VectorType v(666999);
 
         std::generate(std::begin(v), std::end(v), [n = 0]() mutable { return n++; });
 
