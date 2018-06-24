@@ -46,34 +46,42 @@ auto accum = [](VectorIterator begin, VectorIterator end, ElementType init)
     return std::accumulate(begin, end, init);
 };
 
-// TODO(sikor): template, decltype, tests, parts, time
+// TODO(sikor): template, decltype, tests, parts
 auto compt(VectorType& v)
 {
     std::packaged_task<TaskType> pt0{ accum };          // package the task (i.e., accum)
     std::packaged_task<TaskType> pt1{ accum };
+    std::packaged_task<TaskType> pt2{ accum };
+    std::packaged_task<TaskType> pt3{ accum };
 
     std::future<ElementType> f0{ pt0.get_future() };    // get hold of pt0’s future
     std::future<ElementType> f1{ pt1.get_future() };    // get hold of pt1’s future
+    std::future<ElementType> f2{ pt2.get_future() };
+    std::future<ElementType> f3{ pt3.get_future() };
 
-    auto begin = std::begin(v);
-    auto end = std::end(v);
-    auto size = std::size(v);
+    auto v0 = std::begin(v);
+    auto sz = std::size(v);
 
     // start a thread for ptx, move is necessary because ptx is non-copyable object,
     // copy constructor is deleted, std::packaged_task is move-only.
-    std::thread t1{ std::move(pt0), begin, begin + size / 2, 0.0 };
-    std::thread t2{ std::move(pt1), begin + size / 2, end, 0.0 };
+    std::thread t0{ std::move(pt0), v0            , v0 + sz * 0.25, 0.0 };
+    std::thread t1{ std::move(pt1), v0 + sz * 0.25, v0 + sz * 0.50, 0.0 };
+    std::thread t2{ std::move(pt2), v0 + sz * 0.50, v0 + sz * 0.75, 0.0 };
+    std::thread t3{ std::move(pt3), v0 + sz * 0.75, v0 + sz       , 0.0 };
 
-    t1.join();
-    t2.join();
+    t0.detach();
+    t1.detach();
+    t2.detach();
+    t3.detach();
 
-    return get(f0) + get(f1);
+    return get(f0) + get(f1) + get(f2) + get(f3);
 }
 
 auto compa(VectorType& v)
 {
     auto v0 = std::begin(v);
     auto sz = std::size(v);
+    
     auto f0 = std::async(std::launch::async, accum, v0            , v0 + sz * 0.25, 0.0);
     auto f1 = std::async(std::launch::async, accum, v0 + sz * 0.25, v0 + sz * 0.50, 0.0);
     auto f2 = std::async(std::launch::async, accum, v0 + sz * 0.50, v0 + sz * 0.75, 0.0);
@@ -86,30 +94,61 @@ auto compp(VectorType& v)
 {
     std::promise<ElementType> p0;
     std::promise<ElementType> p1;
+    std::promise<ElementType> p2;
+    std::promise<ElementType> p3;
 
     std::future<ElementType> f0 = p0.get_future();
     std::future<ElementType> f1 = p1.get_future();
+    std::future<ElementType> f2 = p2.get_future();
+    std::future<ElementType> f3 = p3.get_future();
 
-    auto begin = std::begin(v);
-    auto end = std::end(v);
-    auto size = std::size(v);
+    auto v0 = std::begin(v);
+    auto sz = std::size(v);
 
-    std::thread t1{ set, &p0, accum, begin, begin + size / 2 };
-    std::thread t2{ set, &p1, accum, begin + size / 2, end };
+    std::thread t0{ set, &p0, accum, v0            , v0 + sz * 0.25 };
+    std::thread t1{ set, &p1, accum, v0 + sz * 0.25, v0 + sz * 0.50 };
+    std::thread t2{ set, &p2, accum, v0 + sz * 0.50, v0 + sz * 0.75 };
+    std::thread t3{ set, &p3, accum, v0 + sz * 0.75, v0 + sz        };
 
+    t0.detach();
     t1.detach();
-    t2.detach();;
+    t2.detach();
+    t3.detach();
 
-    return get(f0) + get(f1);
+    return get(f0) + get(f1) + get(f2) + get(f3);
 }
 
 int main()
 {
-    VectorType v{ 0,1,2,3,4,5,6,7,8 };
+    using namespace std::chrono;
 
-    std::cout << compt(v) << std::endl;
-    std::cout << compa(v) << std::endl;
-    std::cout << compp(v) << std::endl;
+    try
+    {
+        VectorType v(100000000);
+
+        std::generate(std::begin(v), std::end(v), [n = 0]() mutable { return n++; });
+
+        auto tt0 = high_resolution_clock::now();
+        auto ctr = compt(v);
+        auto tt1 = high_resolution_clock::now();
+
+        auto ta0 = high_resolution_clock::now();
+        auto car = compa(v);
+        auto ta1 = high_resolution_clock::now();
+
+        auto tp0 = high_resolution_clock::now();
+        auto ctp = compp(v);
+        auto tp1 = high_resolution_clock::now();
+
+        std::cout << "ct(v) = " << ctr << ", t = " << duration_cast<microseconds>(tt1 - tt0).count() << std::endl;
+        std::cout << "ca(v) = " << car << ", t = " << duration_cast<microseconds>(ta1 - ta0).count() << std::endl;
+        std::cout << "cp(v) = " << ctp << ", t = " << duration_cast<microseconds>(tp1 - tp0).count() << std::endl;
+
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << "Caught exception \"" << ex.what() << "\"\n";
+    }
 
     std::system("pause");
 }

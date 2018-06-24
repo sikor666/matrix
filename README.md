@@ -1,7 +1,3 @@
-# matrix
-free your mind
-
-
 # windows
 mkdir build
 
