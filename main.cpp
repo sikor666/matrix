@@ -46,8 +46,7 @@ auto accum = [](VectorIterator begin, VectorIterator end, ElementType init)
     return std::accumulate(begin, end, init);
 };
 
-// TODO(sikor): template, decltype
-auto compt(VectorType& v)
+auto futureFromPackagedTask(VectorType& v)
 {
     std::packaged_task<TaskType> pt0{ accum };          // package the task (i.e., accum)
     std::packaged_task<TaskType> pt1{ accum };
@@ -77,7 +76,7 @@ auto compt(VectorType& v)
     return get(f0) + get(f1) + get(f2) + get(f3);
 }
 
-auto compa(VectorType& v)
+auto futureFromAsync(VectorType& v)
 {
     auto v0 = std::begin(v);
     auto sz = std::size(v);
@@ -90,7 +89,7 @@ auto compa(VectorType& v)
     return get(f0) + get(f1) + get(f2) + get(f3);
 }
 
-auto compp(VectorType& v)
+auto futureFromPromise(VectorType& v)
 {
     std::promise<ElementType> p0;
     std::promise<ElementType> p1;
@@ -125,25 +124,28 @@ int main()
 
     try
     {
-        VectorType v(666999);
+        VectorType v(1000000);
 
         std::generate(std::begin(v), std::end(v), [n = 0]() mutable { return n++; });
 
         auto tt0 = high_resolution_clock::now();
-        auto ctr = compt(v);
+        auto ctr = futureFromPackagedTask(v);
         auto tt1 = high_resolution_clock::now();
 
         auto ta0 = high_resolution_clock::now();
-        auto car = compa(v);
+        auto car = futureFromAsync(v);
         auto ta1 = high_resolution_clock::now();
 
         auto tp0 = high_resolution_clock::now();
-        auto ctp = compp(v);
+        auto cpr = futureFromPromise(v);
         auto tp1 = high_resolution_clock::now();
 
-        std::cout << "ct(v) = " << ctr << ", t = " << duration_cast<microseconds>(tt1 - tt0).count() << std::endl;
-        std::cout << "ca(v) = " << car << ", t = " << duration_cast<microseconds>(ta1 - ta0).count() << std::endl;
-        std::cout << "cp(v) = " << ctp << ", t = " << duration_cast<microseconds>(tp1 - tp0).count() << std::endl;
+        std::cout << "ft(v) = " << ctr << ", t = "
+                  << duration_cast<microseconds>(tt1 - tt0).count() << std::endl;
+        std::cout << "fa(v) = " << car << ", t = "
+                  << duration_cast<microseconds>(ta1 - ta0).count() << std::endl;
+        std::cout << "fp(v) = " << cpr << ", t = "
+                  << duration_cast<microseconds>(tp1 - tp0).count() << std::endl;
 
     }
     catch (const std::exception& ex)
