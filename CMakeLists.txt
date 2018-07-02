@@ -11,4 +11,4 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Add the executable
-add_executable(matrix main.cpp src/Future/Looper.hpp)
+add_executable(matrix main.cpp src/Future/Looper.hpp src/Time/Travel.hpp)

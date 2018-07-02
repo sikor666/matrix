@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Time/Travel.hpp"
+
 #include <future>
 #include <iostream>
 #include <numeric>
@@ -52,15 +54,15 @@ auto accum = [](VectorIterator begin, VectorIterator end, ElementType init)
     return std::accumulate(begin, end, init);
 };
 
-class ICommand
+class ITask
 {
 public:
     virtual ElementType execute() = 0;
 
-    virtual ~ICommand() = default;
+    virtual ~ITask() = default;
 };
 
-class FromPackagedTask : public ICommand
+class FromPackagedTask : public ITask
 {
 public:
     FromPackagedTask(VectorType& vec) : v(vec)
@@ -101,7 +103,7 @@ private:
     VectorType& v;
 };
 
-class FromAsync : public ICommand
+class FromAsync : public ITask
 {
 public:
     FromAsync(VectorType& vec) : v(vec)
@@ -125,7 +127,7 @@ private:
     VectorType& v;
 };
 
-class FromPromise : public ICommand
+class FromPromise : public ITask
 {
 public:
     FromPromise(VectorType& vec) : v(vec)
@@ -168,26 +170,23 @@ private:
 class Looper
 {
 private:
-    std::vector<std::unique_ptr<ICommand>> commands;
+    std::vector<std::unique_ptr<ITask>> tasks;
 
 public:
-    void add(std::unique_ptr<ICommand> command)
+    void add(std::unique_ptr<ITask>&& command)
     {
-        commands.push_back(std::move(command));
+        tasks.push_back(std::move(command));
     }
 
     void run()
     {
-        using namespace std::chrono;
-
-        for (const auto &cmd : commands)
+        for (const auto &task : tasks)
         {
-            auto t0 = high_resolution_clock::now();
-            auto res = cmd->execute();
-            auto t1 = high_resolution_clock::now();
+            Time::Travel<> travel;
 
-            std::cout << "f(v) = " << res << ", t = "
-                << duration_cast<microseconds>(t1 - t0).count() << std::endl;
+            auto result = task->execute();
+
+            std::cout << "f(v) = " << result << ", t = " << travel.distance() << std::endl;
         }
     }
 };
