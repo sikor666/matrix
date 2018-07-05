@@ -4,16 +4,14 @@ int main()
 {
     try
     {
-        using namespace Future;
-
-        VectorType v(1000000);
+        Future::VectorType v(1000000);
         std::generate(std::begin(v), std::end(v), [n = 0]() mutable { return n++; });
 
-        Looper looper;
+        Future::Looper looper;
 
-        looper.add(std::make_unique<FromPackagedTask>(v));
-        looper.add(std::make_unique<FromAsync>(v));
-        looper.add(std::make_unique<FromPromise>(v));
+        looper.add(std::make_unique<Future::FromPackagedTask>(v));
+        looper.add(std::make_unique<Future::FromAsync>(v));
+        looper.add(std::make_unique<Future::FromPromise>(v));
 
         looper.run();
     }

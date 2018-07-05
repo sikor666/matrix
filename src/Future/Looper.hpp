@@ -17,7 +17,7 @@ using TaskType = ElementType(VectorIterator, VectorIterator, ElementType);
 
 // task: place the value in px
 auto set = [](
-    std::promise<ElementType>&& px,
+    std::promise<ElementType> px,
     std::function<TaskType> task,
     VectorIterator begin,
     VectorIterator end)
@@ -173,7 +173,8 @@ private:
     std::vector<std::unique_ptr<ITask>> tasks;
 
 public:
-    void add(std::unique_ptr<ITask>&& command)
+    //function consuming a unique_ptr can take it by value or by rvalue reference
+    void add(std::unique_ptr<ITask> command)
     {
         tasks.push_back(std::move(command));
     }
