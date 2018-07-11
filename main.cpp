@@ -1,5 +1,7 @@
 #include "Future/Looper.hpp"
 
+#include <algorithm>
+
 int main()
 {
     try
