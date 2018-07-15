@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.10)
 
 project(matrix)
 
@@ -10,6 +10,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #find_package(LLVM REQUIRED CONFIG)
 #message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 #message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
+# Find threads package
+find_package(Threads)
 
 # Add boost package
 set(Boost_USE_STATIC_LIBS ON)
