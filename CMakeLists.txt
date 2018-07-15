@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 #find_package(LLVM REQUIRED CONFIG)
-
 #message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 #message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
@@ -16,7 +15,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREAD ON)
 
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system date_time)
 if(Boost_FOUND)
 	include_directories(${Boost_INCLUDE_DIRS})
 	link_directories(${Boost_LIBRARY_DIRS})
@@ -31,9 +30,10 @@ endif(OPENSSL_FOUND)
 # Add include path
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/beast)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/beast/include)
 
 # Add the executable
 add_executable(matrix main.cpp src/Future/Looper.hpp src/Time/Travel.hpp src/Connection/Session.hpp)
 
 # Add link libraries
-target_link_libraries(matrix LINK_PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARY} ssl crypto)
+target_link_libraries(matrix LINK_PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY})
