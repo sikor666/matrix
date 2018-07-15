@@ -8,7 +8,7 @@
 #include <numeric>
 #include <vector>
 
-#include <boost/asio/io_context.hpp>
+#include <boost/asio/io_service.hpp>
 
 namespace Future
 {
@@ -186,7 +186,7 @@ public:
     {
         for (const auto &task : tasks)
         {
-            Time::Travel<Connection::Boost::Session, boost::asio::io_context, ssl::context> travel;
+            Time::Travel<Connection::Boost::Session, boost::asio::io_service, ssl::context> travel;
 
             auto result = task->execute();
 

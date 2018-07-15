@@ -1,9 +1,19 @@
 #pragma once
 
+#include "example/common/root_certificates.hpp"
+
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl.hpp>
+#include <boost/beast/http.hpp>
+
 #include <chrono>
 
 namespace Time
 {
+
+using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
+namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 
 template
 <

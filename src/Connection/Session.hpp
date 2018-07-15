@@ -1,11 +1,19 @@
-#include "common/root_certificates.hpp"
+//
+// Copyright (c) 2016-2017 Vinnie Falco (vinnie dot falco at gmail dot com)
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+// Official repository: https://github.com/boostorg/beast
+//
+
+#include "example/common/root_certificates.hpp"
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/ssl/error.hpp>
 #include <boost/asio/ssl/stream.hpp>
 #include <cstdlib>
 #include <functional>
@@ -45,24 +53,16 @@ void fail(boost::system::error_code ec, char const* what)
 class Session : public ISession
 {
 public:
-    // Resolver and stream require an io_context
-    explicit Session(boost::asio::io_context& ioc, ssl::context& ctx)
-        : resolver_(ioc)
-        , stream_(ioc, ctx)
+    // Resolver and stream require an io_service
+    explicit Session(boost::asio::io_service& ios, ssl::context& ctx)
+        : resolver_(ios)
+        , stream_(ios, ctx)
     {
     }
 
     // Start the asynchronous operation
     void run(std::string host, std::string port, std::string target, int version)
     {
-        // Set SNI Hostname (many hosts need this to handshake successfully)
-        if (!SSL_set_tlsext_host_name(stream_.native_handle(), host.c_str()))
-        {
-            boost::system::error_code ec{ static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category() };
-            std::cerr << ec.message() << "\n";
-            return;
-        }
-
         // Set up an HTTP GET request message
         req_.version(version);
         req_.method(http::verb::get);
@@ -71,9 +71,7 @@ public:
         req_.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
 
         // Look up the domain name
-        resolver_.async_resolve(
-            host,
-            port,
+        resolver_.async_resolve({host, port},
             std::bind(
                 &Session::on_resolve,
                 this,
@@ -81,7 +79,7 @@ public:
                 std::placeholders::_2));
     }
 
-    void on_resolve(boost::system::error_code ec, tcp::resolver::results_type results)
+    void on_resolve(boost::system::error_code ec, tcp::resolver::iterator result)
     {
         if (ec)
             return fail(ec, "resolve");
@@ -89,8 +87,7 @@ public:
         // Make the connection on the IP address we get from a lookup
         boost::asio::async_connect(
             stream_.next_layer(),
-            results.begin(),
-            results.end(),
+            result,
             std::bind(
                 &Session::on_connect,
                 this,
@@ -131,7 +128,7 @@ public:
 
         if (ec)
             return fail(ec, "write");
-
+        
         // Receive the HTTP response
         http::async_read(stream_, buffer_, res_,
             std::bind(
