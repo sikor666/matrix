@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.12)
 
 project(matrix)
 
@@ -15,10 +15,19 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Find threads package
 find_package(Threads)
 
+find_package(OpenSSL)
+if(OpenSSL_FOUND)
+	message(STATUS "ok")
+	message(STATUS ${OpenSSL_INCLUDE_DIRS})
+	message(STATUS ${OpenSSL_LIBRARY_DIRS})
+	
+	include_directories(${OpenSSL_INCLUDE_DIRS})
+	link_directories(${OpenSSL_LIBRARY_DIRS})
+endif(OpenSSL_FOUND)
+
 # Add include path
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
-include_directories(/workspace/beast/include)
-include_directories(/workspace/beast)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/beast)
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREAD ON)
