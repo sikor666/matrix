@@ -13,29 +13,35 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
 # Find threads package
-find_package(Threads)
+#find_package(Threads)
 
-find_package(OpenSSL)
-if(OpenSSL_FOUND)
-	message(STATUS "ok")
-	message(STATUS ${OpenSSL_INCLUDE_DIRS})
-	message(STATUS ${OpenSSL_LIBRARY_DIRS})
-	
-	include_directories(${OpenSSL_INCLUDE_DIRS})
-	link_directories(${OpenSSL_LIBRARY_DIRS})
-endif(OpenSSL_FOUND)
-
-# Add include path
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/beast)
-
+# Add boost package
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREAD ON)
+
 find_package(Boost REQUIRED COMPONENTS system)
 if(Boost_FOUND)
 	include_directories(${Boost_INCLUDE_DIRS})
 	link_directories(${Boost_LIBRARY_DIRS})
 endif(Boost_FOUND)
+
+# Add ssl package
+find_package(OpenSSL)
+if(OPENSSL_FOUND)
+	message(STATUS ${OPENSSL_FOUND})
+	message(STATUS ${OPENSSL_INCLUDE_DIR})
+	message(STATUS ${OPENSSL_CRYPTO_LIBRARY})
+	message(STATUS ${OPENSSL_SSL_LIBRARY})
+	message(STATUS ${OPENSSL_LIBRARIES})
+	message(STATUS ${OPENSSL_VERSION})
+	
+	include_directories(${OPENSSL_INCLUDE_DIR})
+	link_directories(${OPENSSL_LIBRARIES})
+endif(OPENSSL_FOUND)
+
+# Add include path
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/beast)
 
 # Add the executable
 add_executable(matrix main.cpp src/Future/Looper.hpp src/Time/Travel.hpp src/Connection/Session.hpp)
