@@ -1,11 +1,14 @@
 #pragma once
 
 #include "Time/Travel.hpp"
+#include "Connection/Session.hpp"
 
 #include <future>
 #include <iostream>
 #include <numeric>
 #include <vector>
+
+#include <boost/asio/io_context.hpp>
 
 namespace Future
 {
@@ -183,9 +186,12 @@ public:
     {
         for (const auto &task : tasks)
         {
-            Time::Travel<> travel;
+            Time::Travel<Connection::Boost::Session, boost::asio::io_context, ssl::context> travel;
 
             auto result = task->execute();
+
+            travel.launch();
+            travel.run();
 
             std::cout << "f(v) = " << result << ", t = " << travel.distance() << std::endl;
         }
