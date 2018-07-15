@@ -12,9 +12,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 #message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 
-# Find threads package
-#find_package(Threads)
-
 # Add boost package
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREAD ON)
@@ -28,15 +25,7 @@ endif(Boost_FOUND)
 # Add ssl package
 find_package(OpenSSL)
 if(OPENSSL_FOUND)
-	message(STATUS ${OPENSSL_FOUND})
-	message(STATUS ${OPENSSL_INCLUDE_DIR})
-	message(STATUS ${OPENSSL_CRYPTO_LIBRARY})
-	message(STATUS ${OPENSSL_SSL_LIBRARY})
-	message(STATUS ${OPENSSL_LIBRARIES})
-	message(STATUS ${OPENSSL_VERSION})
-	
 	include_directories(${OPENSSL_INCLUDE_DIR})
-	link_directories(${OPENSSL_LIBRARIES})
 endif(OPENSSL_FOUND)
 
 # Add include path
