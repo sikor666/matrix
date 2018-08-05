@@ -30,6 +30,13 @@ if(OPENSSL_FOUND)
 	include_directories(${OPENSSL_INCLUDE_DIR})
 endif(OPENSSL_FOUND)
 
+# Add OpenCV package
+set(OpenCV_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/opencv/build)
+find_package(OpenCV REQUIRED)
+if(OpenCV_FOUND)
+	include_directories(${OpenCV_INCLUDE_DIRS})
+endif(OpenCV_FOUND)
+
 # Add include path
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/beast)
@@ -39,4 +46,4 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/beast/include)
 add_executable(matrix main.cpp src/Future/Looper.hpp src/Time/Travel.hpp src/Connection/Session.hpp)
 
 # Add link libraries
-target_link_libraries(matrix LINK_PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY})
+target_link_libraries(matrix LINK_PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY} ${OpenCV_LIBS})
