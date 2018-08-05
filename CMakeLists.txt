@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.10)
 project(matrix)
 
 # Setting the C++ standard directly
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS ON)
 
 #find_package(LLVM REQUIRED CONFIG)
 #message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
@@ -46,4 +46,4 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/beast/include)
 add_executable(matrix main.cpp src/Future/Looper.hpp src/Time/Travel.hpp src/Connection/Session.hpp)
 
 # Add link libraries
-target_link_libraries(matrix LINK_PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY} ${OpenCV_LIBS})
+target_link_libraries(matrix LINK_PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY} ${OpenCV_LIBS} ${Boost_PROGRAM_OPTIONS_LIBRARY})
