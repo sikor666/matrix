@@ -1,22 +1,17 @@
 #pragma once
 
+#include "ITask.hpp"
 #include "Time/Travel.hpp"
 #include "Connection/Session.hpp"
 
 #include <future>
 #include <iostream>
 #include <numeric>
-#include <vector>
 
 #include <boost/asio/io_service.hpp>
 
 namespace Future
 {
-
-using ElementType = double;
-using VectorType = std::vector<ElementType>;
-using VectorIterator = VectorType::iterator;
-using TaskType = ElementType(VectorIterator, VectorIterator, ElementType);
 
 // task: place the value in px
 auto set = [](
@@ -55,14 +50,6 @@ auto get = [](std::future<ElementType>& fx)
 auto accum = [](VectorIterator begin, VectorIterator end, ElementType init)
 {
     return std::accumulate(begin, end, init);
-};
-
-class ITask
-{
-public:
-    virtual ElementType execute() = 0;
-
-    virtual ~ITask() = default;
 };
 
 class FromPackagedTask : public ITask

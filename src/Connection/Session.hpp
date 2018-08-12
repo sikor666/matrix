@@ -1,3 +1,5 @@
+#pragma once
+
 //
 // Copyright (c) 2016-2017 Vinnie Falco (vinnie dot falco at gmail dot com)
 //

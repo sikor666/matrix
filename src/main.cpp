@@ -1,11 +1,11 @@
+#include "ITask.hpp"
 #include "Future/Looper.hpp"
+#include "Image/Matrix.hpp"
 
 #include <boost/program_options.hpp>
-#include <opencv2/opencv.hpp>
 
 #include <algorithm>
 
-using namespace cv;
 namespace po = boost::program_options;
 
 int main(int ac, char* av[])
@@ -22,7 +22,7 @@ int main(int ac, char* av[])
         po::store(po::parse_command_line(ac, av, desc), vm);
         po::notify(vm);
 
-        Mat image;
+        std::string resource;
 
         if (vm.count("help"))
         {
@@ -32,25 +32,17 @@ int main(int ac, char* av[])
 
         if (vm.count("image"))
         {
-            std::string img = vm["image"].as<std::string>();
+            resource = vm["image"].as<std::string>();
 
-            std::cout << "Image data was set to "
-                << img << ".\n";
+            std::cout << "Image data was set to " << image << ".\n";
 
-            image = imread(img.c_str(), 1);
-
-            if (image.data)
-            {
-                namedWindow("Display Image", WINDOW_AUTOSIZE);
-                imshow("Display Image", image);
-            }
         }
         else
         {
             std::cout << "Image data was not set.\n";
         }
 
-        Future::VectorType v(1000000);
+        VectorType v(1000000);
         std::generate(std::begin(v), std::end(v), [n = 0]() mutable { return n++; });
 
         Future::Looper looper;
@@ -58,6 +50,7 @@ int main(int ac, char* av[])
         looper.add(std::make_unique<Future::FromPackagedTask>(v));
         looper.add(std::make_unique<Future::FromAsync>(v));
         looper.add(std::make_unique<Future::FromPromise>(v));
+        looper.add(std::make_unique<Image::LoadFromRes>(resource));
 
         looper.run();
     }
@@ -65,6 +58,4 @@ int main(int ac, char* av[])
     {
         std::cerr << "Caught exception \"" << ex.what() << "\"\n";
     }
-
-    waitKey(0);
 }
