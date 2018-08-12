@@ -34,7 +34,7 @@ int main(int ac, char* av[])
         {
             resource = vm["image"].as<std::string>();
 
-            std::cout << "Image data was set to " << image << ".\n";
+            std::cout << "Image data was set to " << resource << ".\n";
 
         }
         else
