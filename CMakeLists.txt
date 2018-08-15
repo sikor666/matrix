@@ -3,11 +3,11 @@ cmake_minimum_required(VERSION 3.10)
 project(matrix)
 
 # Setting the C++ standard directly
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS ON)
 
-add_definitions(-std=c++14 -Wall)
+#add_definitions(-std=c++${CMAKE_CXX_STANDARD} -Wall)
 
 # Find threads package
 find_package(Threads)
@@ -16,7 +16,7 @@ find_package(Threads)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREAD ON)
 
-find_package(Boost REQUIRED COMPONENTS system date_time)
+find_package(Boost REQUIRED COMPONENTS system date_time program_options)
 if(Boost_FOUND)
 	include_directories(${Boost_INCLUDE_DIRS})
 	link_directories(${Boost_LIBRARY_DIRS})
@@ -40,7 +40,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/beast)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/ext/beast/include)
 
-add_subdirectory(src)
+# Add the executable
+add_executable(matrix
+src/main.cpp
+src/Future/Looper.hpp
+src/Time/Travel.hpp
+src/Connection/Session.hpp
+src/Image/Matrix.hpp)
 
 # Add link libraries
 target_link_libraries(matrix LINK_PRIVATE ${CMAKE_THREAD_LIBS_INIT} ${Boost_SYSTEM_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY} ${OPENSSL_SSL_LIBRARY} ${OpenCV_LIBS} ${Boost_PROGRAM_OPTIONS_LIBRARY})

@@ -10,3 +10,4 @@ RUN apt-get -y install python
 RUN apt-get -y install git
 RUN apt-get -y install libboost-all-dev
 RUN apt-get -y install libssl-dev
+RUN apt-get -y install libgtk2.0-dev
