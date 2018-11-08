@@ -10,5 +10,4 @@ cd build
 cmake ..  
   
 # Windows
-cmake -G "Visual Studio 15" ..  
-  
+cmake -G "Visual Studio 15" ..
